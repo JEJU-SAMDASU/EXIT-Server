@@ -61,8 +61,8 @@ class AbleTime(models.Model):
         User, on_delete=models.CASCADE, related_name="client", null=True
     )
     day = models.IntegerField(null=True)
-    able_from = models.CharField(max_length=50)
-    able_to = models.CharField(max_length=50)
+    able_from = models.CharField(max_length=50, null=True)
+    able_to = models.CharField(max_length=50, null=True)
     is_available = models.BooleanField(default=True)
     concern = models.CharField(null=True, max_length=255)
     is_video = models.BooleanField(default=False)
