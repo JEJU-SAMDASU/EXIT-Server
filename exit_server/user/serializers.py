@@ -70,42 +70,22 @@ class CreateClientSerializer(serializers.ModelSerializer):
         fields = ("uid", "email", "password", "username")
 
     def create(self, validated_data):
-        return User.objects.create(**validated_data)
+        validated_data["password"] = make_password(validated_data["password"])
+        user = User.objects.create(**validated_data)
+        return user
 
 
-class LoginCounselorSerializer(serializers.Serializer):
+class LoginUserSerializer(serializers.Serializer):
     uid = serializers.CharField()
     password = serializers.CharField()
 
     def validate(self, data):
-        credentials = {"uid": data["uid"], "password": data["password"]}
-        user = authenticate(**credentials)
+        user = authenticate(data)
 
-        payload = {"uid": user.uid, "email": user.email}
+        payload = {"uid": user.uid, "email": user.email, "username": user.username}
 
         token = utils.jwt_encode_handler(payload)
         return user, token
-
-        msg = _("Unable to login with provided credentials")
-        raise serializers.ValidationError(msg)
-
-
-class LoginClientSerializer(serializers.Serializer):
-    uid = serializers.CharField()
-    password = serializers.CharField()
-
-    def validate(self, data):
-        credentials = {"uid": data["uid"], "password": data["password"]}
-        user = authenticate(**credentials)
-
-        if user and user.is_active:
-            payload = {"uid": user.uid, "email": user.email}
-
-            token = utils.jwt_encode_handler(payload)
-            return user, token
-
-        msg = _("Unable to login with provided credentials")
-        raise serializers.ValidationError(msg)
 
 
 class CounselorSerializer(serializers.Serializer):
@@ -126,7 +106,10 @@ class ClientSerializer(serializers.ModelSerializer):
 
 class AbleTimeSerializer(serializers.Serializer):
     counselor = serializers.CharField()
+    client = serializers.CharField()
     day = serializers.CharField()
     able_from = serializers.CharField()
     able_to = serializers.CharField()
     is_available = serializers.CharField()
+    concern = serializers.CharField()
+    is_video = serializers.BooleanField()
