@@ -34,7 +34,7 @@ class UserManager(BaseUserManager):  # Helper Class
         return user
 
     def get_by_natural_key(self, username):
-        return self.get(username=username)
+        return self.get(uid=username)
 
 
 class User(AbstractUser):

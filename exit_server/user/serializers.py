@@ -71,7 +71,7 @@ class CreateCounselorSerializer(serializers.ModelSerializer):
 class CreateClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("uid", "email", "password", "username")
+        fields = ("uid", "email", "password", "username", "is_counselor", "is_client")
 
     def create(self, validated_data):
         validated_data["password"] = make_password(validated_data["password"])
