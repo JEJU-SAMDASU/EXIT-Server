@@ -33,6 +33,7 @@ DATABASES = config_secret_common["django"]["database"]
 
 
 # ============== 프로젝트 이름이 바뀌었기 때문에 아래처럼 변경해주자 =============
+AUTH_USER_MODEL = "user.User"
 
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"
@@ -42,6 +43,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",  # Django가 관리하는 AUTH
+]
 
 # Application definition
 
@@ -52,6 +56,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "reservation",
+    "user",
+    "rest_framework",
 ]
 
 MIDDLEWARE = [
@@ -84,7 +91,6 @@ TEMPLATES = [
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-
 
 
 # Password validation
