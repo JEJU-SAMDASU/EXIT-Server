@@ -22,10 +22,10 @@ class AbleTime(models.Model):
     counselor = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="counselor"
     )
-    client = models.ForeignKey(User, on_delete=models.CASCADE, related_name="client")
+    client = models.ForeignKey(User, on_delete=models.CASCADE, related_name="client", null=True)
     day = models.IntegerField()
     able_from = models.CharField(max_length=50)
     able_to = models.CharField(max_length=50)
     is_available = models.BooleanField(default=True)
-    concern = models.CharField(null=True)
+    concern = models.CharField(max_length=255, null=True)
     is_video = models.BooleanField(default=False)

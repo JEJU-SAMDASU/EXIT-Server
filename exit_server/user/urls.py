@@ -5,6 +5,7 @@ from .views import (
     ClientRegisterationView,
     CounselorRegisterationView,
     UserView,
+    CategoryView,
 )
 
 urlpatterns = [
@@ -13,4 +14,5 @@ urlpatterns = [
     path("counselor/login/", CounselorLoginView.as_view()),
     path("client/login/", ClientLoginView.as_view()),
     path("counselor/<uid>", UserView.as_view()),
+    path("category/<category>", CategoryView.as_view()),
 ]

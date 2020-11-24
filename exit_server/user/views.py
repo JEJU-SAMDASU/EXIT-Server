@@ -50,7 +50,6 @@ class ClientRegisterationView(generics.GenericAPIView):
     serializer = self.get_serializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     user = serializer.save()
-
     return Response(
         {"user": CounselorSerializer(user).data}, status=status.HTTP_201_CREATED
     )
@@ -91,7 +90,6 @@ class UserView(generics.RetrieveAPIView):
 
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
-        # instance.category = [for in Cate]
         print(Category.objects.filter(user="gksqls0128"))
         for c in Category.objects.filter(user="gksqls0128"):
             print(c)
@@ -101,3 +99,20 @@ class UserView(generics.RetrieveAPIView):
             c.subject for c in Category.objects.filter(user="gksqls0128")
         ]
         return Response(result)
+
+
+class CategoryView(generics.RetrieveAPIView):
+    serializer_class = CounselorSerializer
+    queryset = User.objects.all()
+    lookup_field = "category"
+
+    def get(self, request, *args, **kwargs):
+        category_id = Category.objects.get(subject=kwargs['category']).id
+        users = User.objects.filter(category=category_id)
+        result = []
+        for user in users:
+            result.append(self.get_serializer(user).data)
+
+
+        return Response({"counselors":result})
+
