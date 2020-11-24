@@ -6,16 +6,13 @@ class Category(models.Model):
     subject = models.CharField(max_length=50)
 
 
-class Counselor(AbstractBaseUser):
-    uid = models.CharField(primary_key=True)
-    email = models.CharField(unique=True)
+class User(AbstractBaseUser):
+    uid = models.CharField(primary_key=True, max_length=50)
+    email = models.CharField(unique=True, max_length=50)
     name = models.CharField(max_length=50)
+    is_counselor = models.BooleanField()
+    is_client = models.BooleanField()
     introduction = models.CharField(max_length=255)
-    categorys = models.ManyToManyField(Category)
+    tag = models.ManyToManyField(Category)
     able_time = models.CharField(max_length=255, default="")
 
-
-class Client(AbstractBaseUser):
-    uid = models.CharField(primary_key=True)
-    email = models.CharField(unique=True)
-    name = models.CharField(max_length=50)
