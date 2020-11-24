@@ -4,12 +4,15 @@ from rest_framework.response import Response
 from .serializers import (
     CreateCounselorSerializer,
     CreateClientSerializer,
-    LoginCounselorSerializer,
-    LoginClientSerializer,
+    LoginUserSerializer,
     CounselorSerializer,
     ClientSerializer,
+    AbleTimeSerializer,
 )
-from .models import User, Category
+from .models import User, Category, AbleTime
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+
+from rest_framework.permissions import IsAuthenticated
 
 
 class CounselorRegisterationView(generics.GenericAPIView):
@@ -58,21 +61,24 @@ class ClientRegisterationView(generics.GenericAPIView):
 
 
 class CounselorLoginView(generics.GenericAPIView):
-    serializer_class = LoginCounselorSerializer
+    serializer_class = LoginUserSerializer
+    lookup_field = "uid"
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user, token = serializer.validated_data
 
+        result = CounselorSerializer(user).data
+        result["category"] = [c.subject for c in Category.objects.filter(user=user.uid)]
         return Response(
-            {"user": CounselorSerializer(user).data, "token": token},
+            {"user": result, "token": token},
             status=status.HTTP_200_OK,
         )
 
 
 class ClientLoginView(generics.GenericAPIView):
-    serializer_class = LoginClientSerializer
+    serializer_class = LoginUserSerializer
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -85,19 +91,35 @@ class ClientLoginView(generics.GenericAPIView):
 
 
 class UserView(generics.RetrieveAPIView):
+    authentication_classes = [JSONWebTokenAuthentication]
     serializer_class = CounselorSerializer
+    permission_classes = [IsAuthenticated]
     queryset = User.objects.all()
     lookup_field = "uid"
 
     def get(self, request, *args, **kwargs):
-        instance = self.get_object()
-        # instance.category = [for in Cate]
-        print(Category.objects.filter(user="gksqls0128"))
-        for c in Category.objects.filter(user="gksqls0128"):
-            print(c)
+        instance = User.objects.get(uid=request.user.uid)
         serializer = self.get_serializer(instance)
         result = serializer.data
         result["category"] = [
-            c.subject for c in Category.objects.filter(user="gksqls0128")
+            c.subject for c in Category.objects.filter(user=request.user.uid)
         ]
         return Response(result)
+
+
+class AbleTimeView(generics.RetrieveAPIView):
+    authentication_classes = [JSONWebTokenAuthentication]
+    serializer_class = AbleTimeSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = AbleTime.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        if request.user.is_counselor:
+            abletimes = AbleTime.objects.filter(counselor=kwargs["uid"])
+
+        result = []
+        for abletime in abletimes:
+            serializer = self.get_serializer(abletime)
+            if serializer.data["is_available"]:
+                result.append(serializer.data)
+        return Response({"able_times": result})
