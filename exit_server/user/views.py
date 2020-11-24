@@ -1,7 +1,15 @@
 from rest_framework import generics, status
 from rest_framework import viewsets
 from rest_framework.response import Response
-from .serializers import CreateCounselorSerializer, CreateClientSerializer, LoginCounselorSerializer, LoginClientSerializer, CounselorSerializer, ClientSerializer
+from .serializers import (
+    CreateCounselorSerializer,
+    CreateClientSerializer,
+    LoginCounselorSerializer,
+    LoginClientSerializer,
+    CounselorSerializer,
+    ClientSerializer,
+)
+from .models import User, Category
 
 
 class CounselorRegisterationView(generics.GenericAPIView):
@@ -19,7 +27,6 @@ class CounselorRegisterationView(generics.GenericAPIView):
         user_data = serializer.validated_data
 
         return Response(user_data, status=status.HTTP_201_CREATED)
-
 
 
 class ClientRegisterationView(generics.GenericAPIView):
@@ -49,6 +56,7 @@ class ClientRegisterationView(generics.GenericAPIView):
     )
 """
 
+
 class CounselorLoginView(generics.GenericAPIView):
     serializer_class = LoginCounselorSerializer
 
@@ -56,9 +64,12 @@ class CounselorLoginView(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user, token = serializer.validated_data
+
         return Response(
-            {"user": CounselorSerializer(user).data, "token": token}, status=status.HTTP_200_OK,
+            {"user": CounselorSerializer(user).data, "token": token},
+            status=status.HTTP_200_OK,
         )
+
 
 class ClientLoginView(generics.GenericAPIView):
     serializer_class = LoginClientSerializer
@@ -68,5 +79,25 @@ class ClientLoginView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         user, token = serializer.validated_data
         return Response(
-            {"user": ClientSerializer(user).data, "token": token}, status=status.HTTP_200_OK,
+            {"user": ClientSerializer(user).data, "token": token},
+            status=status.HTTP_200_OK,
         )
+
+
+class UserView(generics.RetrieveAPIView):
+    serializer_class = CounselorSerializer
+    queryset = User.objects.all()
+    lookup_field = "uid"
+
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        # instance.category = [for in Cate]
+        print(Category.objects.filter(user="gksqls0128"))
+        for c in Category.objects.filter(user="gksqls0128"):
+            print(c)
+        serializer = self.get_serializer(instance)
+        result = serializer.data
+        result["category"] = [
+            c.subject for c in Category.objects.filter(user="gksqls0128")
+        ]
+        return Response(result)
