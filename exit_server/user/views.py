@@ -107,6 +107,19 @@ class UserView(generics.RetrieveAPIView):
         return Response(result)
 
 
+class CounselorListView(generics.ListAPIView):
+    authentication_classes = [JSONWebTokenAuthentication]
+    serializer_class = CounselorSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = User.objects.all()
+    lookup_field = "uid"
+
+    def list(self, request):
+        queryset = User.objects.filter(is_counselor=True)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+
 class AbleTimeView(generics.RetrieveAPIView):
     authentication_classes = [JSONWebTokenAuthentication]
     serializer_class = AbleTimeSerializer
@@ -114,9 +127,10 @@ class AbleTimeView(generics.RetrieveAPIView):
     queryset = AbleTime.objects.all()
 
     def get(self, request, *args, **kwargs):
-        if request.user.is_counselor:
-            abletimes = AbleTime.objects.filter(counselor=kwargs["uid"])
+        if not request.user.is_counselor:
+            return Response({"message": "you are not conselor"}, status=401)
 
+        abletimes = AbleTime.objects.filter(counselor=kwargs["uid"])
         result = []
         for abletime in abletimes:
             serializer = self.get_serializer(abletime)

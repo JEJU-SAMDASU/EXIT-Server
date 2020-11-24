@@ -53,7 +53,11 @@ class CreateCounselorSerializer(serializers.ModelSerializer):
             user.category.add(category)
 
         for i, able_time in enumerate(validated_data["able_time"]):
-            able_from, able_to = able_time.split("~")
+            try:
+                able_from, able_to = able_time.split("~")
+            except:
+                able_from = None
+                able_to = None
             AbleTime.objects.create(
                 counselor_id=validated_data["uid"],
                 day=i,
@@ -67,7 +71,7 @@ class CreateCounselorSerializer(serializers.ModelSerializer):
 class CreateClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("uid", "email", "password", "username")
+        fields = ("uid", "email", "password", "username", "is_counselor", "is_client")
 
     def create(self, validated_data):
         validated_data["password"] = make_password(validated_data["password"])
