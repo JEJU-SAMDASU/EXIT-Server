@@ -12,7 +12,13 @@ class User(AbstractBaseUser):
     name = models.CharField(max_length=50)
     is_counselor = models.BooleanField()
     is_client = models.BooleanField()
-    introduction = models.CharField(max_length=255)
-    tag = models.ManyToManyField(Category)
-    able_time = models.CharField(max_length=255, default="")
+    introduction = models.CharField(max_length=255, null=True)
+    category = models.ManyToManyField(Category, null=True)
 
+
+class AbleTime(models.Model):
+    counselor = models.ForeignKey(User, on_delete=models.CASCADE)
+    day = models.IntegerField()
+    able_from = models.CharField(max_length=50)
+    able_to = models.CharField(max_length=50)
+    is_available = models.BooleanField(default=True)

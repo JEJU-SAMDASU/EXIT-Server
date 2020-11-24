@@ -1,7 +1,9 @@
-from rest_framework.urls import urlpatterns
-from .views import signup
-from django.contrib import auth
+from django.urls import path, include
+from .views import ClientLoginView, CounselorLoginView, ClientRegisterationView, CounselorRegisterationView
 
 urlpatterns = [
-    auth("/signup", signup()),
+    path('counselor/sign-up/', CounselorRegisterationView.as_view()),
+    path('client/sign-up/', ClientRegisterationView.as_view()),
+    path('counselor/login/', CounselorLoginView.as_view()),
+    path('client/login/', ClientLoginView.as_view())
 ]
