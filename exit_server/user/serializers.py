@@ -53,7 +53,11 @@ class CreateCounselorSerializer(serializers.ModelSerializer):
             user.category.add(category)
 
         for i, able_time in enumerate(validated_data["able_time"]):
-            able_from, able_to = able_time.split("~")
+            try:
+                able_from, able_to = able_time.split("~")
+            except:
+                able_from = None
+                able_to = None
             AbleTime.objects.create(
                 counselor_id=validated_data["uid"],
                 day=i,
