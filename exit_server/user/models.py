@@ -1,11 +1,11 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.contrib.auth.models import AbstractUser
 
 
 class Category(models.Model):
     subject = models.CharField(max_length=50)
 
-
+    
 class UserManager(BaseUserManager):  # Helper Class
     def create_user(self, email, username, password=None, **kwargs):
         if not email:
@@ -38,19 +38,15 @@ class UserManager(BaseUserManager):  # Helper Class
 
 
 class User(AbstractUser):
-    objects = UserManager()
-
     uid = models.CharField(primary_key=True, max_length=50)
     email = models.CharField(unique=True, max_length=50)
     username = models.CharField(max_length=50)
-    is_counselor = models.BooleanField(default=False)
-    is_client = models.BooleanField(default=False)
+    is_counselor = models.BooleanField()
+    is_client = models.BooleanField()
     introduction = models.CharField(max_length=255, null=True)
     category = models.ManyToManyField(Category, null=True)
 
     USERNAME_FIELD = "uid"
-
-    REQUIRED_FIELDS = ["username"]
 
 
 class AbleTime(models.Model):
@@ -64,5 +60,5 @@ class AbleTime(models.Model):
     able_from = models.CharField(max_length=50, null=True)
     able_to = models.CharField(max_length=50, null=True)
     is_available = models.BooleanField(default=True)
-    concern = models.CharField(null=True, max_length=255)
+    concern = models.CharField(max_length=255, null=True)
     is_video = models.BooleanField(default=False)

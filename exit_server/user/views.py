@@ -4,15 +4,12 @@ from rest_framework.response import Response
 from .serializers import (
     CreateCounselorSerializer,
     CreateClientSerializer,
-    LoginUserSerializer,
+    LoginCounselorSerializer,
+    LoginClientSerializer,
     CounselorSerializer,
     ClientSerializer,
-    AbleTimeSerializer,
 )
-from .models import User, Category, AbleTime
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-
-from rest_framework.permissions import IsAuthenticated
+from .models import User, Category
 
 
 class CounselorRegisterationView(generics.GenericAPIView):
@@ -53,7 +50,6 @@ class ClientRegisterationView(generics.GenericAPIView):
     serializer = self.get_serializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     user = serializer.save()
-
     return Response(
         {"user": CounselorSerializer(user).data}, status=status.HTTP_201_CREATED
     )
@@ -61,24 +57,21 @@ class ClientRegisterationView(generics.GenericAPIView):
 
 
 class CounselorLoginView(generics.GenericAPIView):
-    serializer_class = LoginUserSerializer
-    lookup_field = "uid"
+    serializer_class = LoginCounselorSerializer
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user, token = serializer.validated_data
 
-        result = CounselorSerializer(user).data
-        result["category"] = [c.subject for c in Category.objects.filter(user=user.uid)]
         return Response(
-            {"user": result, "token": token},
+            {"user": CounselorSerializer(user).data, "token": token},
             status=status.HTTP_200_OK,
         )
 
 
 class ClientLoginView(generics.GenericAPIView):
-    serializer_class = LoginUserSerializer
+    serializer_class = LoginClientSerializer
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -91,22 +84,33 @@ class ClientLoginView(generics.GenericAPIView):
 
 
 class UserView(generics.RetrieveAPIView):
-    authentication_classes = [JSONWebTokenAuthentication]
     serializer_class = CounselorSerializer
-    permission_classes = [IsAuthenticated]
     queryset = User.objects.all()
     lookup_field = "uid"
 
     def get(self, request, *args, **kwargs):
-        instance = User.objects.get(uid=request.user.uid)
+        instance = self.get_object()
+        print(Category.objects.filter(user="gksqls0128"))
+        for c in Category.objects.filter(user="gksqls0128"):
+            print(c)
         serializer = self.get_serializer(instance)
         result = serializer.data
         result["category"] = [
-            c.subject for c in Category.objects.filter(user=request.user.uid)
+            c.subject for c in Category.objects.filter(user="gksqls0128")
         ]
         return Response(result)
 
+      
+class CategoryView(generics.RetrieveAPIView):
+    serializer_class = CounselorSerializer
+    queryset = User.objects.all()
+    lookup_field = "category"
 
+    def get(self, request, *args, **kwargs):
+        category_id = Category.objects.get(subject=kwargs['category']).id
+        users = User.objects.filter(category=category_id)
+        
+        
 class CounselorListView(generics.ListAPIView):
     authentication_classes = [JSONWebTokenAuthentication]
     serializer_class = CounselorSerializer
@@ -132,8 +136,9 @@ class AbleTimeView(generics.RetrieveAPIView):
 
         abletimes = AbleTime.objects.filter(counselor=kwargs["uid"])
         result = []
-        for abletime in abletimes:
-            serializer = self.get_serializer(abletime)
-            if serializer.data["is_available"]:
-                result.append(serializer.data)
-        return Response({"able_times": result})
+        for user in users:
+            result.append(self.get_serializer(user).data)
+
+
+        return Response({"counselors":result})
+
