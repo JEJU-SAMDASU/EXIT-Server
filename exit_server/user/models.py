@@ -1,11 +1,11 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 
 
 class Category(models.Model):
     subject = models.CharField(max_length=50)
 
-    
+
 class UserManager(BaseUserManager):  # Helper Class
     def create_user(self, email, username, password=None, **kwargs):
         if not email:

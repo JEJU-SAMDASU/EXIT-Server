@@ -1,6 +1,8 @@
 from rest_framework import generics, status
 from rest_framework import viewsets
 from rest_framework.response import Response
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 from .serializers import (
     CreateCounselorSerializer,
     CreateClientSerializer,
@@ -8,8 +10,9 @@ from .serializers import (
     LoginClientSerializer,
     CounselorSerializer,
     ClientSerializer,
+    AbleTimeSerializer,
 )
-from .models import User, Category
+from .models import User, Category, AbleTime
 
 
 class CounselorRegisterationView(generics.GenericAPIView):
@@ -86,13 +89,9 @@ class ClientLoginView(generics.GenericAPIView):
 class UserView(generics.RetrieveAPIView):
     serializer_class = CounselorSerializer
     queryset = User.objects.all()
-    lookup_field = "uid"
 
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
-        print(Category.objects.filter(user="gksqls0128"))
-        for c in Category.objects.filter(user="gksqls0128"):
-            print(c)
         serializer = self.get_serializer(instance)
         result = serializer.data
         result["category"] = [
@@ -100,17 +99,17 @@ class UserView(generics.RetrieveAPIView):
         ]
         return Response(result)
 
-      
+
 class CategoryView(generics.RetrieveAPIView):
     serializer_class = CounselorSerializer
     queryset = User.objects.all()
     lookup_field = "category"
 
     def get(self, request, *args, **kwargs):
-        category_id = Category.objects.get(subject=kwargs['category']).id
+        category_id = Category.objects.get(subject=kwargs["category"]).id
         users = User.objects.filter(category=category_id)
-        
-        
+
+
 class CounselorListView(generics.ListAPIView):
     authentication_classes = [JSONWebTokenAuthentication]
     serializer_class = CounselorSerializer
@@ -139,6 +138,4 @@ class AbleTimeView(generics.RetrieveAPIView):
         for user in users:
             result.append(self.get_serializer(user).data)
 
-
-        return Response({"counselors":result})
-
+        return Response({"counselors": result})
