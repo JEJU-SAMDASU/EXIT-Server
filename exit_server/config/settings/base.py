@@ -41,12 +41,9 @@ WSGI_APPLICATION = "config.wsgi.application"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
-AUTHENTICATION_BACKENDS = [
-    "django.contrib.auth.backends.ModelBackend",  # Django가 관리하는 AUTH
-]
-
+AUTHENTICATION_BACKENDS = ["user.backends.UserBackend"]
 # Application definition
 
 INSTALLED_APPS = [
